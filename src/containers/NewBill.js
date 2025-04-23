@@ -112,17 +112,26 @@ export default class NewBill {
       fileName: this.fileName,
       status: 'pending'
     }
-    
-    //this.updateBill(bill)
 
-    try {
-      await this.updateBill(bill) // wait for update to succeed or fail
+    this.store
+    .bills()
+    .update({ data: JSON.stringify(bill), selector: this.billId })
+    .then(() => {
       this.onNavigate(ROUTES_PATH['Bills'])
-    } catch (error) {
-      console.error(" Error caught in handleSubmit:", error)
-      this.onNavigate(ROUTES_PATH['NewBills'], error) // pass error to router
-    }
-  }
+    })
+    .catch(error => {
+      // Remove existing error messages
+      const oldError = this.document.querySelector('[data-testid="error-message"]')
+      if (oldError) {
+        //console.log("old error message HTML",oldError.innerHTML)
+        oldError.remove()
+      }
+      // Append new error
+      this.document.body.innerHTML += `<div data-testid="error-message">${error.message}</div>`;
+      console.log("this.document.body.innerHTML in .catch error:\n",this.document.body.innerHTML)
+    })
+
+}
 
   // not need to cover this function by tests
 
@@ -142,14 +151,4 @@ export default class NewBill {
       });
     }
   }
-  /*
-  updateBill = (bill) => {
-    console.log("***** updateBill Called in NewBill *******")
-    if (this.store) {
-      return this.store
-        .bills()
-        .update({data: JSON.stringify(bill), selector: this.billId})
-    }
-  }
-  */
 }

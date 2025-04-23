@@ -159,73 +159,77 @@ describe("Given I am connected as an employee", () => {
 
 // Integration tests
 describe("Given I am on NewBill Page and submitting a valid form", () => {
-  describe("When API Error 500 ", () => {
+  describe("When API Error 404 ", () => {
     
     beforeEach(() => {
-      jest.spyOn(mockStore, "bills")
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })
       window.localStorage.setItem('user', JSON.stringify({
-        type: 'Employee'
+        type: 'Employee',
+        email: "a@a",
       }))
 
       document.body.innerHTML = `<div id="root"></div>`;
       
       router()
-      window.onNavigate(ROUTES_PATH.NewBill);
-
     })
 
-    test("should display 500 error and not call onNavigate", async () => {
+    test("should display error 404", async () => {
 
-    const updateMock = jest.fn().mockRejectedValueOnce(new Error("Erreur 500"));
-      
-    // Override mockStore
-    const store = {
-      bills: jest.fn(() => ({ update: updateMock }))
-    };
+      // 🔧 Setup the mocked store
+      mockStore.bills = jest.fn(() => ({
+      update: () => Promise.reject(new Error("Erreur 404 dans API Mocked ")),
+      }))
 
-    const onNavigate = jest.fn();
-    const newBill = new NewBill({
-        document,
-        onNavigate,
-        store,
-        localStorage: window.localStorage,
-      });
-
-    // Fill form fields
-    screen.getByTestId("expense-type").value = "Transports";
-    screen.getByTestId("expense-name").value = "Taxi de Luxe";
-    screen.getByTestId("amount").value = "300";
-    screen.getByTestId("datepicker").value = "2024-03-15";
-    screen.getByTestId("vat").value = "10";
-    screen.getByTestId("pct").value = "20";
-    screen.getByTestId("commentary").value = "Ride to meeting OF Course";
-
-    // Fake file upload (optional depending on your form)
-    newBill.fileUrl = "http://some-url.com/file.png";
-    newBill.fileName = "file.png";
-
+      // Navigate to NewBill page
+      window.onNavigate(ROUTES_PATH.NewBill)
+  
+      // Submit form
       const form = screen.getByTestId("form-new-bill")
-      form.addEventListener("submit", newBill.handleSubmit);
-
       fireEvent.submit(form)
-
-      await waitFor(() => {
-        expect(updateMock).toHaveBeenCalled(); // API was called
-      });
-      // Ensure onNavigate is not called after API failure
-      //expect(onNavigate).not.toHaveBeenCalled(); // Navigation should NOT happen
-
-      // Wait for the error message to be rendered
-      const message = await screen.findByText("Erreur 500");
-      expect(message).toBeInTheDocument();
-      //const errorMessage = await screen.findByTestId("error-message");
-      //expect(errorMessage).toHaveTextContent("Erreur 500");
-
-      // Ensure navigation did not happen with the error
-      expect(onNavigate).toHaveBeenCalledWith(ROUTES_PATH['NewBill'], expect.any(Error));
-
+    
+      // Wait for error message to be displayed
+      await new Promise(process.nextTick);
+      const message = await screen.getByText(/Erreur 404/)
+      expect(message).toBeTruthy()
+      expect(message.textContent).toMatch(/Erreur 404/)
     })
-  })  
-});
+  })
 
+
+
+  describe("When API Error 500 ", () => {
+    
+    beforeEach(() => {
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee',
+        email: "a@a",
+      }))
+
+      document.body.innerHTML = `<div id="root"></div>`;
+      
+      router()
+    })
+
+    test("should display error 500", async () => {
+
+      // 🔧 Setup the mocked store
+      mockStore.bills = jest.fn(() => ({
+      update: () => Promise.reject(new Error("Erreur 500 dans API Mocked ")),
+      }))
+
+      // Navigate to NewBill page
+      window.onNavigate(ROUTES_PATH.NewBill)
+  
+      // Submit form
+      const form = screen.getByTestId("form-new-bill")
+      fireEvent.submit(form)
+    
+      // Wait for error message to be displayed
+      await new Promise(process.nextTick);
+      const message = await screen.getByText(/Erreur 500/)
+      expect(message).toBeTruthy()
+      expect(message.textContent).toMatch(/Erreur 500/)
+    })
+  })
+})
