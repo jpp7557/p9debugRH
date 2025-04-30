@@ -1,6 +1,8 @@
 import { ROUTES_PATH } from '../constants/routes.js'
 import { formatDate, formatStatus } from "../app/format.js"
 import Logout from "./Logout.js"
+import BillsUI from "../views/BillsUI.js"
+import ErrorPage from "../views/ErrorPage.js"; 
 
 export default class {
   constructor({ document, onNavigate, store, localStorage }) {
@@ -20,6 +22,7 @@ export default class {
     this.onNavigate(ROUTES_PATH['NewBill'])
   }
 
+  
   handleClickIconEye = (icon) => {
     const billUrl = icon.getAttribute("data-bill-url")
     const imgWidth = Math.floor($('#modaleFile').width() * 0.5)
@@ -28,33 +31,49 @@ export default class {
   }
 
   getBills = () => {
-    if (this.store) {
-      return this.store
-      .bills()
-      .list()
-      .then(snapshot => {
-        const bills = snapshot
+    console.log("[17.03.2025] in src/containers/Bills.js, getBills called") // 17.03.2025
+    try {
+      if (this.store) {
+        return this.store
+        .bills()
+        .list()
+        .then(snapshot => {
+          const bills = snapshot
+          .map(doc => ({
+            ...doc,
+            rawDate: doc.date // 17.03.2025 Store raw date for sorting
+            })
+          )
+          // Sorting BEFORE formatting 17.03.2025
+          .sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate))
+          // Apply formatting AFTER sorting  // 17.03.2025
           .map(doc => {
             try {
               return {
                 ...doc,
-                date: formatDate(doc.date),
+                date: formatDate(doc.rawDate),
                 status: formatStatus(doc.status)
-              }
-            } catch(e) {
-              // if for some reason, corrupted data was introduced, we manage here failing formatDate function
-              // log the error and return unformatted date in that case
-              console.log(e,'for',doc)
+              };
+            } catch (e) {
+              console.error('Date formatting error:', e, 'for', doc);
               return {
                 ...doc,
-                date: doc.date,
+                date: doc.rawDate, // Keep raw date if formatting fails  17.03.2025
                 status: formatStatus(doc.status)
-              }
+              };
             }
-          })
-          console.log('length', bills.length)
-        return bills
-      })
-    }
+          });
+          console.log('[17.03.2025] src/containers/Bills.js, bills.length :', bills.length)
+          return bills
+        })
+        .catch(error => {
+          // Trigger an error display when there's an issue
+          throw error;
+        });
+      }
+    } catch (error) {
+      // Handle any unexpected errors
+      throw error;
+    }    
   }
 }

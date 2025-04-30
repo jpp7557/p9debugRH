@@ -3,6 +3,7 @@
  */
 
 import {fireEvent, screen, waitFor} from "@testing-library/dom"
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event'
 import DashboardFormUI from "../views/DashboardFormUI.js"
 import DashboardUI from "../views/DashboardUI.js"
@@ -13,7 +14,7 @@ import mockStore from "../__mocks__/store"
 import { bills } from "../fixtures/bills"
 import router from "../app/Router"
 
-jest.mock("../app/store", () => mockStore)
+jest.mock("../app/Store", () => mockStore)
 
 describe('Given I am connected as an Admin', () => {
   describe('When I am on Dashboard page, there are bills, and there is one pending', () => {
@@ -242,6 +243,7 @@ describe('Given I am connected as Admin and I am on Dashboard page and I clicked
 
 // test d'intégration GET
 describe("Given I am a user connected as Admin", () => {
+
   describe("When I navigate to Dashboard", () => {
     test("fetches bills from mock API GET", async () => {
       localStorage.setItem("user", JSON.stringify({ type: "Admin", email: "a@a" }));
@@ -249,14 +251,19 @@ describe("Given I am a user connected as Admin", () => {
       root.setAttribute("id", "root")
       document.body.append(root)
       router()
+
       window.onNavigate(ROUTES_PATH.Dashboard)
+
       await waitFor(() => screen.getByText("Validations"))
+
       const contentPending  = await screen.getByText("En attente (1)")
       expect(contentPending).toBeTruthy()
       const contentRefused  = await screen.getByText("Refusé (2)")
       expect(contentRefused).toBeTruthy()
       expect(screen.getByTestId("big-billed-icon")).toBeTruthy()
     })
+
+  // Error 404 and 500 tests
   describe("When an error occurs on API", () => {
     beforeEach(() => {
       jest.spyOn(mockStore, "bills")
@@ -274,21 +281,21 @@ describe("Given I am a user connected as Admin", () => {
       document.body.appendChild(root)
       router()
     })
-    test("fetches bills from an API and fails with 404 message error", async () => {
+    test("fetches from API and fails with 404 message error", async () => {
 
       mockStore.bills.mockImplementationOnce(() => {
         return {
-          list : () =>  {
-            return Promise.reject(new Error("Erreur 404"))
-          }
-        }})
+          list : () =>  Promise.reject(new Error("Erreur 404")) //new Error() mandatory to call ErrorPage.js
+        }
+      })  
       window.onNavigate(ROUTES_PATH.Dashboard)
       await new Promise(process.nextTick);
+      console.log("Integration Test error 404 innerHTML\n", document.body.innerHTML)
       const message = await screen.getByText(/Erreur 404/)
       expect(message).toBeTruthy()
-    })
+      })
 
-    test("fetches messages from an API and fails with 500 message error", async () => {
+    test("fetches from API and fails with 500 message error", async () => {
 
       mockStore.bills.mockImplementationOnce(() => {
         return {
@@ -306,4 +313,3 @@ describe("Given I am a user connected as Admin", () => {
 
   })
 })
-

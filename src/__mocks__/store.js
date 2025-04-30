@@ -1,6 +1,6 @@
 const mockedBills = {
-  list() {
-    return Promise.resolve([{
+  list: jest.fn(() =>
+    Promise.resolve([{
       "id": "47qAXb6fIm2zOKkLzMro",
       "vat": "80",
       "fileUrl": "https://test.storage.tld/v0/b/billable-677b6.a…f-1.jpg?alt=media&token=c1640e12-a24b-4b11-ae52-529112e9602a",
@@ -59,14 +59,15 @@ const mockedBills = {
         "commentary": "test2",
         "type": "Restaurants et bars",
         "fileUrl": "https://test.storage.tld/v0/b/billable-677b6.a…f-1.jpg?alt=media&token=4df6ed2c-12c8-42a2-b013-346c1346f732"
-      }])
-
-  },
-  create(bill) {
-    return Promise.resolve({fileUrl: 'https://localhost:3456/images/test.jpg', key: '1234'})
-  },
-  update(bill) {
-    return Promise.resolve({
+    }])
+  ),
+  create: jest.fn(() =>
+    Promise.resolve({
+      fileUrl: 'https://localhost:3456/images/test.jpg', key: '1234'
+    })
+  ),
+  update: jest.fn(() =>
+    Promise.resolve({
       "id": "47qAXb6fIm2zOKkLzMro",
       "vat": "80",
       "fileUrl": "https://firebasestorage.googleapis.com/v0/b/billable-677b6.a…f-1.jpg?alt=media&token=c1640e12-a24b-4b11-ae52-529112e9602a",
@@ -81,13 +82,27 @@ const mockedBills = {
       "email": "a@a",
       "pct": 20
     })
-  },
+  ),
 }
-
+/*
 export default {
   bills() {
     return mockedBills
     //return {}
   },
 }
+*/
 
+/*
+const mockStore = {
+  bills() {
+    return mockedBills;
+  },
+};
+*/
+
+const mockStore = {
+  bills: jest.fn(() => mockedBills)
+};
+
+export default mockStore;
