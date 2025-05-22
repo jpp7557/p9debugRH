@@ -1,8 +1,6 @@
 import { ROUTES_PATH } from '../constants/routes.js'
 import { formatDate, formatStatus } from "../app/format.js"
 import Logout from "./Logout.js"
-import BillsUI from "../views/BillsUI.js"
-import ErrorPage from "../views/ErrorPage.js"; 
 
 export default class {
   constructor({ document, onNavigate, store, localStorage }) {
@@ -21,7 +19,6 @@ export default class {
   handleClickNewBill = () => {
     this.onNavigate(ROUTES_PATH['NewBill'])
   }
-
   
   handleClickIconEye = (icon) => {
     const billUrl = icon.getAttribute("data-bill-url")
@@ -31,7 +28,6 @@ export default class {
   }
 
   getBills = () => {
-    console.log("[17.03.2025] in src/containers/Bills.js, getBills called") // 17.03.2025
     try {
       if (this.store) {
         return this.store
@@ -41,12 +37,12 @@ export default class {
           const bills = snapshot
           .map(doc => ({
             ...doc,
-            rawDate: doc.date // 17.03.2025 Store raw date for sorting
+            rawDate: doc.date // Store raw date for sorting
             })
           )
-          // Sorting BEFORE formatting 17.03.2025
+          // Sorting BEFORE formatting
           .sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate))
-          // Apply formatting AFTER sorting  // 17.03.2025
+          // Apply formatting AFTER sorting
           .map(doc => {
             try {
               return {
@@ -54,8 +50,10 @@ export default class {
                 date: formatDate(doc.rawDate),
                 status: formatStatus(doc.status)
               };
-            } catch (e) {
-              console.error('Date formatting error:', e, 'for', doc);
+            } catch(e) {
+              // if for some reason, corrupted data was introduced, we manage here failing formatDate function
+              // log the error and return unformatted date in that case
+             console.error('Date formatting error:', e,'for',doc);
               return {
                 ...doc,
                 date: doc.rawDate, // Keep raw date if formatting fails  17.03.2025
@@ -63,7 +61,6 @@ export default class {
               };
             }
           });
-          console.log('[17.03.2025] src/containers/Bills.js, bills.length :', bills.length)
           return bills
         })
         .catch(error => {

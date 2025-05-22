@@ -2,20 +2,15 @@
  * @jest-environment jsdom
  */
 
-import {fireEvent, screen, waitFor} from "@testing-library/dom"
-import '@testing-library/jest-dom'
+import {screen, waitFor} from "@testing-library/dom"
+import "@testing-library/jest-dom"
 import BillsUI from "../views/BillsUI.js"
 import { bills } from "../fixtures/bills.js"
-import { ROUTES, ROUTES_PATH} from "../constants/routes.js";
+import { ROUTES_PATH} from "../constants/routes.js";
 import {localStorageMock} from "../__mocks__/localStorage.js";
 import mockStore from "../__mocks__/store"
 import Bills from "../containers/Bills.js";  //Import the default class as Bills
-import ErrorPage from "../views/ErrorPage.js"; 
-import router from "../app/Router"
-
-
-//import fetchMock from "jest-fetch-mock";
-//fetchMock.enableMocks();
+import router from "../app/Router.js";
 
 
 jest.mock("../app/Store", () => ({
@@ -26,7 +21,6 @@ jest.mock("../app/Store", () => ({
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
-    //test("Then the Bill page should have a new-bill button", async () => {
       
     Object.defineProperty(window, 'localStorage', { value: localStorageMock })
       window.localStorage.setItem('user', JSON.stringify({
@@ -47,15 +41,9 @@ describe("Given I am connected as an employee", () => {
     })
     test("Then bills (should) be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills });
-      //console.log("========== in __test__/Bills.js, BEFORE Sorting\n")
-      //console.log("BillUI:\n",document.body.innerHTML)
-      //console.table(bills, ['name', 'date', 'amount']);
       const dates = screen.getAllByText(/^(19|20)\d\d[-/.](0[1-9]|1[012])[-/.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
-      //const antiChrono = (a, b) => ((a < b) ? 1 : -1);
       const antiChrono = (a, b) => (new Date(b) - new Date(a));
       const datesSorted = [...dates].sort(antiChrono);
-      //console.log("========== in __test__/Bills.js, AFTER Sorting")
-      //console.log("dates, datesSorted\n", dates, "\n", datesSorted)
       expect(dates).toEqual(datesSorted);
     });
   });
@@ -100,9 +88,6 @@ describe("Given I am connected as an employee", () => {
     
       // Call the method that handles the click event
       await billsInstance.handleClickIconEye(iconEye);
-
-      console.log('Modal mock call count:', $.fn.modal.mock.calls.length);
-      console.log('Modal mock call arguments:', $.fn.modal.mock.calls);
     
       // Check if the modal is shown
       expect($.fn.modal).toHaveBeenCalledWith('show');
@@ -110,8 +95,6 @@ describe("Given I am connected as an employee", () => {
       // Check if the image is displayed in the modal
       const modalBody = document.querySelector(".modal-body");
       const img = modalBody.querySelector("img");
-      console.log("In test show bill, HTML elements :", document.body.innerHTML);
-      console.log("In test show bill, modalBody HTML elements :", modalBody.innerHTML);
       expect(img).not.toBeNull();
       expect(img.alt).toBe("Bill");
     });
@@ -131,16 +114,13 @@ describe("Given I am connected as an employee", () => {
       });
 
       const result = await billsInstance.getBills();
-      //console.table(result, ['id', 'date', 'rawDate', 'amount']); // mon ajout
 
-      expect(result.length).toBe(bills.length);     // mon ajout
-      expect(result[0]).toHaveProperty("date");     // mon ajout
-      expect(result[0]).toHaveProperty("rawDate");  // mon ajout
-      expect(result[0]).toHaveProperty("status");   // mon ajout
+      expect(result.length).toBe(bills.length);    
+      expect(result[0]).toHaveProperty("date");    
+      expect(result[0]).toHaveProperty("rawDate");  
+      expect(result[0]).toHaveProperty("status");   
 
-      //expect(new Date(result[0].rawDate).getTime()).toBeGreaterThanOrEqual(new Date(result[1].rawDate).getTime());
       const rawDates = result.map(bill => bill.rawDate);
-      console.log("rawDates", rawDates);
       const antiChrono = (a, b) => (new Date(b) - new Date(a));
       const datesSorted = [...rawDates].sort(antiChrono)
       expect(rawDates).toEqual(datesSorted)
@@ -201,9 +181,7 @@ describe("Given I am connected as an employee", () => {
   
       window.onNavigate(ROUTES_PATH.Bills);
       await waitFor(() => screen.getByText(/Erreur 404/));
-      console.log("Bills Test for error 404\n",document.body.innerHTML);
       const errorMsg = await screen.getByTestId("error-message");
-      console.log("test pour erreur 404 errorMsg.textContent:\n",errorMsg.textContent);
       expect(errorMsg).toBeInTheDocument();
       expect(errorMsg.textContent).toMatch(/Erreur 404/i);
     });

@@ -87,13 +87,10 @@ export default class {
 
   handleEditTicket(e, bill, bills) {
       console.log("In handleEditTicket Counter before:", this.counter)
-      //console.log(" this.id:", this.id, " =? ", bill.id, "bill.id:")
   
       if (this.counter === undefined || this.id !== bill.id) this.counter = 0
       if (this.id === undefined || this.id !== bill.id) this.id = bill.id
   
-      //console.log("Counter after:", this.counter)
-
       if (this.counter % 2 === 0) {
         bills.forEach(b => {
           $(`#open-bill${b.id}`).css({ background: '#0D5AE5' })
@@ -103,7 +100,6 @@ export default class {
         $('.dashboard-right-container div').html(DashboardFormUI(bill))
         $('.vertical-navbar').css({ height: '150vh' })
         this.counter ++
-        console.log("counter ++ EditTicket branche %2", this.counter)
       } else {
         $(`#open-bill${bill.id}`).css({ background: '#0D5AE5' })
   
@@ -112,7 +108,6 @@ export default class {
         `)
         $('.vertical-navbar').css({ height: '120vh' })
         this.counter ++
-        console.log("counter ++ EditTicket ELSE %2", this.counter)
       }
       // Attach listeners every time because UI was updated
     $('#icon-eye-d').click(this.handleClickIconEye)
@@ -152,13 +147,13 @@ export default class {
 
     if (isOpen) {
       // ▼ Open: Show the filtered bills
-      console.log("OPEN counter-id", index)
+      //console.log("OPEN counter-id", index)
 
       $(`#arrow-icon${index}`).css({ transform: 'rotate(0deg)' });
       $(`#status-bills-container${index}`)
         .html(cards(filteredBills(bills, getStatus(index))));
     } else {
-      console.log("CLOSE counter-id", index)
+      //console.log("CLOSE counter-id", index)
 
       // ▶ Close: Hide the bills
       $(`#arrow-icon${index}`).css({ transform: 'rotate(90deg)' });

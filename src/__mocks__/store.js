@@ -84,6 +84,7 @@ const mockedBills = {
     })
   ),
 }
+
 /*
 export default {
   bills() {
@@ -93,16 +94,10 @@ export default {
 }
 */
 
-/*
-const mockStore = {
-  bills() {
-    return mockedBills;
-  },
-};
-*/
 
 const mockStore = {
   bills: jest.fn(() => mockedBills)
 };
 
 export default mockStore;
+

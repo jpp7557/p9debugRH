@@ -176,9 +176,16 @@ describe("Given I am on NewBill Page and submitting a valid form", () => {
     test("should display error 404", async () => {
 
       // Setup the mocked store
-      mockStore.bills = jest.fn(() => ({
-      update: () => Promise.reject(new Error("Erreur 404 dans API Mocked ")),
-      }))
+      //mockStore.bills = jest.fn(() => ({
+      //update: () => Promise.reject(new Error("Erreur 404 dans API Mocked ")),
+      //}))
+
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          update: () =>  {
+            return Promise.reject(new Error("Erreur 404"))
+          }
+        }})
 
       // Navigate to NewBill page
       window.onNavigate(ROUTES_PATH.NewBill)
@@ -214,9 +221,9 @@ describe("Given I am on NewBill Page and submitting a valid form", () => {
     test("should display error 500", async () => {
 
       // Setup the mocked store
-      mockStore.bills = jest.fn(() => ({
-      update: () => Promise.reject(new Error("Erreur 500 dans API Mocked ")),
-      }))
+      mockStore.bills.mockImplementationOnce(() => ({
+        update: () => Promise.reject(new Error("Erreur 500"))
+      }));
 
       // Navigate to NewBill page
       window.onNavigate(ROUTES_PATH.NewBill)

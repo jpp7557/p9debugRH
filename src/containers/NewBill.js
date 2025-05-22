@@ -2,10 +2,8 @@ import { ROUTES_PATH } from '../constants/routes.js'
 import Logout from "./Logout.js"
 import ErrorPage from "../views/ErrorPage.js"; 
 
-
 export default class NewBill {
   constructor({ document, onNavigate, store, localStorage }) {
-    console.log("..... constructor of class NewBill called ");
     this.document = document;
     this.onNavigate = onNavigate;
     this.store = store;
@@ -14,10 +12,8 @@ export default class NewBill {
     formNewBill.addEventListener("submit", this.handleSubmit)
 
     const file = this.document.querySelector(`input[data-testid="file"]`);
-    //file.setAttribute("required", "");  // Make file input required
     file.setAttribute("accept", ".jpg, .jpeg, .png");  // file types pre-selection
     file.addEventListener("change", this.handleChangeFile)
-
     // Create an error message container
     this.errorMessage = document.createElement("span");
     this.errorMessage.style.color = "red";    
@@ -41,17 +37,10 @@ export default class NewBill {
     const file = fileInput.files[0]
 
     const fileName = file.name || ""
-    const fileExtension = fileName.split('.').pop().toLowerCase()
-
-    console.log("file.type",file.type)
-
+    //const fileExtension = fileName.split('.').pop().toLowerCase()
     const validTypes = ["image/jpeg", "image/png"]; // Allowed file types
 
-    if (!validTypes.includes(file.type)) { // Check MIME type
-
-      console.log("Invalid File Type");
-      //let errorMessage = document.querySelector(`span[data-testid="file-error"]`);
-      //errorMessage.textContent = "Invalid file type. Only JPG or PNG allowed.";
+    if (!validTypes.includes(file.type)) { // Check MIME type in stead of using file extension
       this.showError("Invalid file type. Please upload a JPG or PNG image.");
       fileInput.value = ""; // Reset the input field
       return;
@@ -69,22 +58,22 @@ export default class NewBill {
       .bills()
       .create({
         data: formData,
-        headers: { noContentType: true }
+        headers: {
+          noContentType: true
+        }
       })
-      .then(({ fileUrl, key }) => {
+      .then(({fileUrl, key}) => {
         this.billId = key
         this.fileUrl = fileUrl
         this.fileName = fileName
-      })
-      .catch(error => {
-        // Trigger an error display when there's an issue
+      }).catch(error => {
         console.error("File upload error:", error);
-        throw error;
+        //throw error;
       });
   }
   handleSubmit = async e => {
     e.preventDefault()
-    console.log("in handleSubmit, datepicker.value:", e.target.querySelector(`input[data-testid="datepicker"]`).value)
+    //console.log("in handleSubmit, datepicker.value:", e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {
       email,
@@ -109,7 +98,6 @@ export default class NewBill {
     .catch(error => {
       // Append new error
       this.document.body.innerHTML += `<div data-testid="error-message">${error.message}</div>`;      
-      //console.log("this.document.body.innerHTML in .catch error:\n",this.document.body.innerHTML)
       //throw error;
     })
 
